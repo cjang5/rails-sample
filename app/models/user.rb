@@ -1,4 +1,7 @@
 class User < ActiveRecord::Base
+	# before_save callback to make sure email is lowercase
+	before_save { self.email = self.email.downcase }
+
 	# Make sure user has a name with acceptable length (MAX = 50)
 	validates :name,  presence: true, length: { maximum: 50 }	
 
@@ -10,4 +13,11 @@ class User < ActiveRecord::Base
 	validates :email, presence: true, length: { maximum: 255 },
 									  format: { with: VALID_EMAIL_REGEX },
 									  uniqueness: { case_sensitive: false }
+
+  # Make sure user has a secure password
+  has_secure_password
+
+  # Make sure user's password has correct length
+  validates :password, length: { minimum: 6 }
+  validates :password_confirmation, length: { minimum: 6 }
 end

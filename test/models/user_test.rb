@@ -2,7 +2,8 @@ require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
   def setup
-  	@user = User.new(name: "Example User", email: "example@example.com")
+  	@user = User.new(name: "Example User", email: "example@example.com",
+                     password: "poopface", password_confirmation: "poopface")
   end
 
   # Test user validity
@@ -69,6 +70,12 @@ class UserTest < ActiveSupport::TestCase
     @user.save # save the user to the database
     assert_not dup.valid? # should be invalid because @user already exists in the database
   end
+
+  # password should have a minimum length of 6
+  test "password should have min length of 6" do
+    @user.password = "yummybutt"
+    @user.password_confirmation = "yummybutt"
+    assert @user.valid?
 end
 
 
