@@ -76,6 +76,7 @@ class UserTest < ActiveSupport::TestCase
     @user.password = "yummybutt"
     @user.password_confirmation = "yummybutt"
     assert @user.valid?
+  end
 end
 
 

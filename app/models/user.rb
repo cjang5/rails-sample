@@ -1,4 +1,8 @@
 class User < ActiveRecord::Base
+  # Create an editable variable 'remember_token' for use in 
+  # the remember me digests for the user
+  attr_accessor :remember_token
+  
 	# before_save callback to make sure email is lowercase
 	before_save { self.email = self.email.downcase }
 
@@ -20,4 +24,36 @@ class User < ActiveRecord::Base
   # Make sure user's password has correct length
   validates :password, length: { minimum: 6 }
   validates :password_confirmation, length: { minimum: 6 }
+
+  # a class method to manually create a password digest for
+  # the given string 'password'. We will use this mainly
+  # in integrations tests with test users where we need to 
+  # fill in the attributes for a new user
+  def User.digest(password)
+  	# The computational cost for generating the password digest
+  	cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST : BCrypt::Engine.cost
+
+  	# Create the password digest using BCrypt and 'cost'
+  	digest = BCrypt::Password.create(password, cost: cost)
+  end
+
+  # Returns a urlsafe base64 string
+  def User.new_token
+    SecureRandom.urlsafe_base64
+  end
+
+  # Create a new remember_me digest for the user for use in a persistent session.
+  def remember
+    # Give the user a remember_me token string
+    self.remember_token = User.new_token
+
+    # Store the digest of the remember_token in the user model
+    update_attribute(:remember_digest, User.digest(self.remember_token))
+  end
+
+  # Authenticate the user based on the remember_token
+  # will return true if the given token matches our hash
+  def authenticated?(remember_token)
+    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  end
 end
