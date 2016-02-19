@@ -18,11 +18,12 @@ module SessionsHelper
 		#@current_user ||= User.find_by(id: session[:user_id])
 
 		# we need to support remember me tokens and permanent sessions
-		if session[:user_id]
-			@current_user ||= User.find_by(id: session[:user_id])
-		elsif cookies.signed[:user_id]
+		# local variable to prevent accessing session multiple times uselessly
+		if (user_id = session[:user_id])
+			@current_user ||= User.find_by(id: user_id)
+		elsif (user_id = cookies.signed[:user_id])
 			# temporary variable holding user
-			user = User.find_by(id: cookies.signed[:user_id])
+			user = User.find_by(id: user_id)
 
 			# check if 'user' exists, and if so, authenticate its remember_token
 			# we will use a helper function authenticated? for validation
@@ -68,5 +69,15 @@ module SessionsHelper
 		# we will also store the user's remember_token 
 		# this is the equivalent of storing the raw password of the user for 'session'
 		cookies.permanent[:remember_token] = user.remember_token
+	end
+
+	# opposite of 'remember(user)'
+	# this method will forget a permanent session
+	def forget(user)
+		user.forget
+
+		# clear the cookies
+		cookies.delete(:user_id)
+		cookies.delete(:remember_token)
 	end
 end

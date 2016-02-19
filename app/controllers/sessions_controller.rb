@@ -26,8 +26,10 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    # call the log_out method in sessions_helper.rb
-  	log_out
+    # call the log_out method in sessions_helper.rb ONLY if a user is logged in already
+    # this avoids the subtle bug of having two concurrent browser windows open
+    # and logging out in one of them but not the other
+  	log_out if logged_in?
 
     # redirect to the home page
     redirect_to root_url # user URLS for 'redirect_to'

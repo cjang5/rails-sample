@@ -51,9 +51,23 @@ class User < ActiveRecord::Base
     update_attribute(:remember_digest, User.digest(self.remember_token))
   end
 
+  # Forgets the user, clearing the permanent session
+  def forget
+    update_attribute(:remember_digest, nil)
+    # We don't need the below line because if we update remember_digest to nil, then
+    # you cannot use the old remember_token anyway, so it is unnecessary
+    # self.remember_token = nil
+  end
+
   # Authenticate the user based on the remember_token
   # will return true if the given token matches our hash
+  # If the remember_digest is nil, then we just return false
+  # This will solve the VERY subtle bug of having 2 different browsers open and logging out
+  # of one but not the other
   def authenticated?(remember_token)
+    if remember_digest.nil?
+      return false
+    end
     BCrypt::Password.new(remember_digest).is_password?(remember_token)
   end
 end
