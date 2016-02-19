@@ -11,8 +11,12 @@ class SessionsController < ApplicationController
   		# log user in and redirect to 'show' page for the user
   		log_in user
 
-      # TEMP: test to see if Remember me functionality is working
-      remember user
+      # We will remember the user on this computer if the 'remember_me' checkbox is checked
+      if params[:session][:remember_me] == '1'
+        remember user
+      else
+        forget user
+      end
 
   		redirect_to user
   	else
