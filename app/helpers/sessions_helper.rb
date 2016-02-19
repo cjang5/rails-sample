@@ -48,6 +48,9 @@ module SessionsHelper
 		# The following line is equivalent to above
 		# session[:user_id] = nil
 
+		# forget the user
+		forget(@current_user)
+
 		# make sure we don't leave a @current_user lying around
 		@current_user = nil
 	end
